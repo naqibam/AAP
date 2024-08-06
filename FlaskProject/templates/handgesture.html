@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <title>Hand Gesture</title>
+  <link rel="stylesheet" href="../static/main.css">
+  <script>
+    function startWebcam() {
+      var video = document.querySelector("#videoElement");
+      if (navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(function (stream) {
+            video.srcObject = stream;
+          })
+          .catch(function (error) {
+            console.log("Something went wrong!");
+          });
+      }
+    }
+
+    function captureImage() {
+      var video = document.querySelector("#videoElement");
+      var canvas = document.querySelector("#canvasElement");
+      var context = canvas.getContext("2d");
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      video.pause();
+      var dataURL = canvas.toDataURL("image/png");
+      document.getElementById('capturedImage').value = dataURL;
+      document.querySelector('.UploadButton').disabled = false;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      startWebcam();
+      document.querySelector('.CaptureButton').addEventListener('click', captureImage);
+    });
+  </script>
+</head>
+<body id="bodycommon">
+  <h1 id="commonh1">Upload file</h1>
+  <a href="/" class="homeButton" id="homeButton"><div class="functionCircle">home</div></a>
+  <form action="{{ url_for('predict_image') }}" method="POST" enctype="multipart/form-data" class="Upload">
+    <div class="formBlock">
+      <video id="videoElement" width="300vb" height="200vb" autoplay style="display: inline-block;"></video>
+      <canvas id="canvasElement" width="300vb" height="200vb" style="display: none;"></canvas>
+      <input type="hidden" id="capturedImage" name="capturedImage">
+      <button type="button" class="CaptureButton"  style="margin-top:-25vb;">Capture Image</button>
+      <button type="submit" class="UploadButton"  style="margin-top:-25vb;" disabled>Upload</button>
+    </div>
+    {% if prediction %}
+    <h1 class="PredictionResult">Prediction Result: {{ prediction }}</h1>
+    {% endif %}
+  </form>
+</body>
+</html>
