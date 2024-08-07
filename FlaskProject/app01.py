@@ -16,7 +16,7 @@ app = Flask(__name__)
 IMAGE_SIZE = 150
 
 # Load the pre-trained model
-model = load_model('model1.h5')
+model = load_model('mymodel1.h5')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://aap:mysql@localhost:3306/aap'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -28,6 +28,7 @@ class Gesture(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     gesture = db.Column(db.Integer, nullable=False)
     message = db.Column(db.String(255), nullable=False)
+    
 
     def __repr__(self):
         return f'<Gesture {self.gesture}: {self.message}>'
@@ -37,10 +38,11 @@ class Message(db.Model):
     __tablename__ = 'message'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     message = db.Column(db.String(255), nullable=False)
+    name = db.Column(db.String(50), nullable=False)
     senttime = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __repr__(self):
-        return f'<Message {self.id}: {self.message} at {self.senttime}>'
+        return f'<Message {self.id}: {self.name} sent {self.message} at {self.senttime}>'
 
 # Define image processing function
 def process_image(img):
@@ -96,9 +98,10 @@ def predict_image():
         # Find the message in the Gesture table
         gesture = Gesture.query.filter_by(id=predicted_class).all()
         if gesture:
+            name = request.form.get('userName')
             message_text = gesture[0].message
             # Create a new row in the Message table
-            new_message = Message(message=message_text)
+            new_message = Message(message=message_text, name=name)
             db.session.add(new_message)
             db.session.commit()
     else:

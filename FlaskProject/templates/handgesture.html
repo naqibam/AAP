@@ -30,6 +30,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+      var name = prompt("Enter your name","Name");
+      document.getElementById('userName').value = name;
       startWebcam();
       document.querySelector('.CaptureButton').addEventListener('click', captureImage);
     });
@@ -43,6 +45,7 @@
       <video id="videoElement" width="300vb" height="200vb" autoplay style="display: inline-block;"></video>
       <canvas id="canvasElement" width="300vb" height="200vb" style="display: none;"></canvas>
       <input type="hidden" id="capturedImage" name="capturedImage">
+      <input type="hidden" id="userName" name="userName">
       <button type="button" class="CaptureButton"  style="margin-top:-25vb;">Capture Image</button>
       <button type="submit" class="UploadButton"  style="margin-top:-25vb;" disabled>Upload</button>
     </div>
