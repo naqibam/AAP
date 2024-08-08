@@ -68,7 +68,7 @@ margin-left: 10vb;
     border-style:solid;
     border-radius: 5%;
     margin-top: 15vb;
-    height: 50vb;
+    height: 60vb;
     width: 50%;
 }
 .formBlock{
@@ -137,4 +137,35 @@ color:white;
   .icon-large {
     font-size: 10vb;
     margin-top:2vb;
+  }
+  #customizeform{
+display:inline-block;
+height: 80vb;
+width: 80%;
+
+  }
+  .inputgesture{
+    width: 80vb;
+    height:5vb
+  }
+
+ .imagegesture{
+    width: 11vb;
+    height: 20vb;
+    margin-right: 20%;
+    margin-top: 0vb;
+    display: inline-block;
+    margin-left: 20%;
+  }
+
+  #updatebtn{
+float:right;
+margin-top: 5vb;
+  }
+
+  .gestureline {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1vb;
+    width:100%;
   }

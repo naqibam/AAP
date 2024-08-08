@@ -20,6 +20,23 @@ IMAGE_SIZE = 150
 # Load the pre-trained model
 model = load_model('mymodel1.h5')
 
+second_model_path = './complete_model.keras'
+if not os.path.exists(second_model_path):
+    raise FileNotFoundError(f"Model file not found at {second_model_path}")
+
+second_model = tf.keras.models.load_model(second_model_path)
+
+# Define constants for the second model
+UNIFORM_SIZE = (128, 128)
+
+# Mapping of predicted classes to messages for the second model
+gesture_messages = {
+    0: "few minutes",
+    1: "more than 10 minutes",
+    2: "skip the class"
+}
+
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://aap:mysql@localhost:3306/aap'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -40,6 +57,7 @@ class Message(db.Model):
     __tablename__ = 'message'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     message = db.Column(db.String(255), nullable=False)
+    duration = db.Column(db.String(50),nullable=True)
     name = db.Column(db.String(50), nullable=False)
     senttime = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
@@ -75,6 +93,16 @@ def process_image(img):
     readyimage = readyimage.reshape((1,) + readyimage.shape)
     return readyimage
 
+
+# Define image processing function for the second model
+def process_image_for_second_model(img):
+    image = Image.fromarray(img)
+    image = image.convert('RGB')
+    image = image.resize(UNIFORM_SIZE, Image.LANCZOS)
+    image = np.array(image) / 255.0
+    image = np.expand_dims(image, axis=0)
+    return image
+
 # Define route for image classification
 @app.route('/classifyImage', methods=['POST'])
 def predict_image():
@@ -93,6 +121,8 @@ def predict_image():
     
     # Process the image
     processed_image = process_image(img)
+    # Process the image for the second model
+    processed_image_second_model = process_image_for_second_model(img)
     
     # Predict and return result
     prediction = model.predict(processed_image)
@@ -108,20 +138,29 @@ def predict_image():
         case 3:
             predicted_class = "Others"
 
-    if predicted_class != "Others":
+    # Predict and return result for the second model
+    prediction_second_model = second_model.predict(processed_image_second_model)
+    predicted_class_second_model = np.argmax(prediction_second_model, axis=1)[0]
+    message_second_model = gesture_messages.get(predicted_class_second_model, "Unknown hand raised")
+
+    if predicted_class != "Others" and message_second_model !="Unknown hand raised":
         # Find the message in the Gesture table
         gesture = Gesture.query.filter_by(id=predicted_class).all()
         if gesture:
             name = request.form.get('userName')
             message_text = gesture[0].message
             # Create a new row in the Message table
-            new_message = Message(message=message_text, name=name)
+            new_message = Message(message=message_text, name=name,duration = message_second_model)
             db.session.add(new_message)
             db.session.commit()
     else:
         message_text = "Invalid hand gesture"
+    
 
-    return render_template('handgesture.html', prediction=message_text)
+
+    
+
+    return render_template('handgesture.html', prediction=message_text,prediction_second_model=message_second_model)
 
 @app.route('/')
 def home():
