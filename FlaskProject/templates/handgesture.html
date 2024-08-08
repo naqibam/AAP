@@ -3,6 +3,10 @@
 <head>
   <meta charset="utf-8">
   <title>Hand Gesture</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="../static/main.css">
   <script>
     function startWebcam() {
@@ -29,9 +33,14 @@
       document.querySelector('.UploadButton').disabled = false;
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-      var name = prompt("Enter your name","Name");
+    function saveName() {
+      var name = document.getElementById('modalUserName').value;
       document.getElementById('userName').value = name;
+      $('#nameModal').modal('hide');
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      $('#nameModal').modal('show');
       startWebcam();
       document.querySelector('.CaptureButton').addEventListener('click', captureImage);
     });
@@ -53,5 +62,25 @@
     <h1 class="PredictionResult">Prediction Result: {{ prediction }}</h1>
     {% endif %}
   </form>
+
+ <!-- Bootstrap Modal -->
+ <div class="modal fade" id="nameModal" tabindex="-1" role="dialog" aria-labelledby="nameModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="nameModalLabel">Enter your name</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="form-control" id="modalUserName" placeholder="Name">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="saveName()">Save</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
