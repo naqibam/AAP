@@ -5,34 +5,70 @@
   <title>Home page</title>
   <link rel="stylesheet" href="../static/main.css">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+
+    function confirmDelete() {
+
+      $('#deleteModal').modal('show');
+    }
+
+  </script>
 </head>
 <body id="bodymessage">
   <h1 id="commonh1">Functions</h1>
-  <a href="/"class="homeButton" id="homeButton"><div class="functionCircle">home</div></a>
+  <a href="/logout" class="homeButton" id="homeButton"><div class="functionCircle">home</div></a>
   <div class="table-container table-responsive">
-    <div class=>       <table class="table table-striped table-light table-hover" id="messageTable">
-        <thead class="theadmessage">
-            <tr>
-            <th scope="col">id</th>
-            <th scope="col">message</th>
-            <th scope="col">time</th>
-            <th scope="col">delete</th>
-            </tr>
-        </thead>
-        <tbody class="tbodymessage">
-            {% for message in messages %}
-            <tr>
-            <td>{{ message.id }}</td>
-            <td>{{ message.message }}</td>
-            <td>{{ message.senttime }}</td>
-            <td> <form action="{{ url_for('DeleteMessage', id=message.id) }}" method="POST" style="display:inline;">
-              <button type="submit" class="btn btn-danger">Delete</button>
-            </form></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-        </table>
-
+    <table class="table table-striped table-light table-hover" id="messageTable">
+      <thead class="theadmessage">
+        <tr>
+          <th scope="col">id</th>
+          <th scope="col">message</th>
+          <th scope="col">time</th>
+          <th scope="col">delete</th>
+        </tr>
+      </thead>
+      <tbody class="tbodymessage">
+        {% for message in messages %}
+        <tr>
+          <td>{{ message.id }}</td>
+          <td>{{ message.message }}</td>
+          <td>{{ message.senttime }}</td>
+          <td>
+            <button type="button" class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+          </td>
+        </tr>
+        <!-- Bootstrap Modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete this message?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <form action="{{ url_for('DeleteMessage', id=message.id) }}" method="POST" style="display:inline;">
+            <button type="submit" class="btn btn-danger">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  
+
+
 </body>
 </html>

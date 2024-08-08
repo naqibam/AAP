@@ -15,6 +15,7 @@ align-items: center;
 margin-top: 20vb;
 border-style: solid;
 border-color: white;
+margin-left: 10vb;
 }
 .functionBlock{
     display: inline-block;
@@ -57,6 +58,7 @@ border-color: white;
     margin-top: 2vb;
     margin-left: 2vb;
     margin-right: 2vb;
+    font-size: 2vb;
 
 }
 .Upload{

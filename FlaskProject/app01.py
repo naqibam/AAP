@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request,render_template,redirect, url_for
+from flask import Flask, jsonify, request,render_template,redirect, url_for,session, flash
 import numpy as np
 import tensorflow as tf
 import cv2
@@ -9,8 +9,10 @@ from tensorflow.keras.models import load_model
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime 
 import base64
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
+app.secret_key = 'supersecretkey'
 
 # Define constants
 IMAGE_SIZE = 150
@@ -43,6 +45,18 @@ class Message(db.Model):
 
     def __repr__(self):
         return f'<Message {self.id}: {self.name} sent {self.message} at {self.senttime}>'
+
+class Staff(db.Model):
+    __tablename__ = 'staff'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(50), nullable=False, unique=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 # Define image processing function
 def process_image(img):
@@ -113,6 +127,24 @@ def predict_image():
 def home():
     return render_template('home.html')
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        staff = Staff.query.filter_by(username=username).first()
+        if staff and staff.check_password(password):
+            session['authenticated'] = True
+            return redirect(url_for('home'))
+        else:
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('authenticated', None)
+    return redirect(url_for('home'))
 
 @app.route('/handgesture')
 def handgesture():
@@ -120,13 +152,41 @@ def handgesture():
 
 @app.route('/customize', methods=['GET'])
 def customize():
-    gestures = Gesture.query.all()
-    return render_template('customize.html', gestures=gestures)
-
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        staff = Staff.query.filter_by(username=username).first()
+        if staff and staff.check_password(password):
+            session['authenticated'] = True
+            return redirect(url_for('customize'))
+        else:
+            flash('Invalid username or password')
+            return redirect(url_for('home'))
+    
+    if 'authenticated' in session and session['authenticated']:
+        gestures = Gesture.query.all()
+        return render_template('customize.html', gestures=gestures)
+    else:
+        return redirect(url_for('home'))
+    
 @app.route('/message', methods=['GET'])
 def MessageTable():
-    messages = Message.query.all()
-    return render_template('message.html', messages=messages)
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        staff = Staff.query.filter_by(username=username).first()
+        if staff and staff.check_password(password):
+            session['authenticated'] = True
+            return redirect(url_for('MessageTable'))
+        else:
+            flash('Invalid username or password')
+            return redirect(url_for('home'))
+
+    if 'authenticated' in session and session['authenticated']:
+        messages = Message.query.all()
+        return render_template('message.html', messages=messages)
+    else:
+        return render_template('login.html')
 
 @app.route('/deletemessage/<int:id>', methods=['POST'])
 def DeleteMessage(id):
@@ -152,6 +212,14 @@ def insert_default_gestures():
         db.session.bulk_save_objects(default_gestures)
         db.session.commit()
 
+def insert_default_staff():
+    row_count = Staff.query.count()
+    if row_count == 0:
+        default_staff = Staff(username='admin')
+        default_staff.set_password('P@ssw0rd')
+        db.session.add(default_staff)
+        db.session.commit()
+
 @app.route('/updateGestures', methods=['POST'])
 def updateGestures():
     gestures = Gesture.query.all()
@@ -168,5 +236,6 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         insert_default_gestures()
+        insert_default_staff()
  
     app.run(debug=True)
