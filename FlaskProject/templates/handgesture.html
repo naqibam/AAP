@@ -61,6 +61,9 @@
     {% if prediction %}
     <h1 class="PredictionResult">Prediction Result: {{ prediction }}</h1>
     {% endif %}
+    {% if prediction_second_model %}
+    <h1 class="PredictionResult">Prediction Result: {{ prediction_second_model }}</h1>
+    {% endif %}
   </form>
 
  <!-- Bootstrap Modal -->

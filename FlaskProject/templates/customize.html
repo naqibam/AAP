@@ -21,15 +21,19 @@
     <h1 id="commonh1">Customize Gestures</h1>
     <a href="/logout"class="homeButton" id="homeButton"><div class="functionCircle">home</div></a>
     <div class="formBlock">
-    <form method="POST" action="{{ url_for('updateGestures') }}" class="customize">
+    <form method="POST" action="{{ url_for('updateGestures') }}" class="customize" id="customizeform">
         {% for gesture in gestures %}
-            <div>
+            <div class="gestureline">
                 <label for="gesture_{{ gesture.id }}_message">Gesture {{ gesture.gesture }}:</label>
-                <input type="text" id="gesture_{{ gesture.id }}_message" name="gesture_{{ gesture.id }}_message" value="{{ gesture.message }}">
+                <input type="text" class="inputgesture"id="gesture_{{ gesture.id }}_message" name="gesture_{{ gesture.id }}_message" value="{{ gesture.message }}">
+                <img src="./static/images/{{ gesture.id }}.jpg" alt="" class="imagegesture">
             </div>
         {% endfor %}
         <button type="submit"class="UploadButton"id="updatebtn">Update Gestures</button>
     </form>
-  </div>
+   
+    
+
+  
   </body>
 </html>

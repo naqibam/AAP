@@ -26,6 +26,8 @@
         <tr>
           <th scope="col">id</th>
           <th scope="col">message</th>
+          <th scope="col">name</th>
+          <th scope="col">duration</th>
           <th scope="col">time</th>
           <th scope="col">delete</th>
         </tr>
@@ -35,7 +37,10 @@
         <tr>
           <td>{{ message.id }}</td>
           <td>{{ message.message }}</td>
+          <td>{{ message.name }}</td>
+          <td>{{ message.duration }}</td>
           <td>{{ message.senttime }}</td>
+          
           <td>
             <button type="button" class="btn btn-danger" onclick="confirmDelete()">Delete</button>
           </td>
