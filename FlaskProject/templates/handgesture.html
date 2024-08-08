@@ -21,16 +21,25 @@
           });
       }
     }
+    setInterval(captureImage,5000)
+      
+
 
     function captureImage() {
       var video = document.querySelector("#videoElement");
       var canvas = document.querySelector("#canvasElement");
       var context = canvas.getContext("2d");
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      video.pause();
-      var dataURL = canvas.toDataURL("image/png");
+      if(video.paused){
+        video.play();
+        document.querySelector('.UploadButton').disabled = true;
+      }
+      else{video.pause();
+        var dataURL = canvas.toDataURL("image/png");
       document.getElementById('capturedImage').value = dataURL;
       document.querySelector('.UploadButton').disabled = false;
+      }
+
     }
 
     function saveName() {
