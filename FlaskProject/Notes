@@ -5,4 +5,4 @@ Mysql set up:
 user = aap
 schema = aap
 password = mysql
-localhoast@3306
+localhoast:3306
