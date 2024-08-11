@@ -11,6 +11,54 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime 
 from flask_migrate import Migrate
 
+import os
+from fileinput import filename
+import pandas as pd
+import nltk
+import numpy as np
+import scipy
+from werkzeug.utils import secure_filename
+import random
+import math
+import re
+from textblob import TextBlob
+import string
+import tensorflow as tf
+import cv2
+import numpy as np
+from transformers import TFAutoModelForSequenceClassification
+from transformers import AutoTokenizer
+
+# nltk
+nltk.download('stopwords')
+nltk.download('punkt')
+from nltk.corpus import stopwords
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.stem import WordNetLemmatizer
+from nltk.stem import PorterStemmer
+nltk.download("wordnet")
+nltk.download("omw-1.4")
+
+UPLOAD_FOLDER = os.path.join('staticFiles', 'uploads')
+
+# Define allowed files
+ALLOWED_EXTENSIONS = {'csv'}
+
+def clean(data):
+    data = data.translate(str.maketrans('', '', string.punctuation))
+    print(data)
+    data = data.lower()
+    print(data)
+    stop = stopwords.words('english')
+    data = ''.join([x for x in re.split(r'(\W+)', data) if x not in stop])
+    print(data)
+    data = str(TextBlob(data).correct())
+    print(data)
+    st = WordNetLemmatizer()
+    data = st.lemmatize(data)
+    print(data)
+    return data
+
 app = Flask(__name__)
 
 # Define constants
@@ -23,6 +71,15 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://aap:mysql@mysql-container:3306/
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
+# Configure upload file path flask
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+app.secret_key = 'This is your secret key to utilize session in Flask'
+
+#model = tf.keras.models.load_model("irisclassifier.h5")
+NaqSentModel = TFAutoModelForSequenceClassification.from_pretrained("finetuned_model")
+tokenizer = AutoTokenizer.from_pretrained('distilbert-base-uncased')
 
 class Gesture(db.Model):
     __tablename__ = 'gesture'
@@ -129,7 +186,79 @@ def updateGestures():
     db.session.commit()
 
     return redirect(url_for('customize'))
+#############################################
+############## NAQIB ROUTES #################
+#############################################
 
+@app.route('/uploadCSV', methods=['GET', 'POST'])
+def uploadFile():
+    if request.method == 'POST':
+      # upload file flask
+        f = request.files.get('file')
+
+        # Extracting uploaded file name
+        data_filename = secure_filename(f.filename)
+
+        f.save(os.path.join(app.config['UPLOAD_FOLDER'], data_filename))
+
+        session['uploaded_data_file_path'] = os.path.join(app.config['UPLOAD_FOLDER'], data_filename)
+
+        return render_template('SentimentForm2.html')
+    return render_template("SentimentForm.html")
+
+@app.route('/show_data')
+def showData():
+    # Uploaded File Path
+    data_file_path = session.get('uploaded_data_file_path', None)
+    # read csv
+    uploaded_df = pd.read_csv(data_file_path, encoding='unicode_escape')
+    # Converting to html Table
+    uploaded_df_html = uploaded_df.to_html()
+    return render_template('show_csv_data.html', data_var=uploaded_df_html)
+
+@app.route('/SentimentForm')
+def SentimentForm():
+    return render_template('SentimentForm.html')
+
+@app.route("/sentiment")
+def sentiment():
+    Positive = 0
+    Negative = 0
+    # Uploaded File Path
+    data_file_path = session.get('uploaded_data_file_path', None)
+    # read csv
+    uploaded_df = pd.read_csv(data_file_path, encoding='unicode_escape')
+    predictions = pd.DataFrame(columns=['Prediction'])
+    #target = ["Negative", "Positive"]
+    for index, row in uploaded_df.iterrows():
+        feedback_cleaned = clean(row['comment'])
+        inputs = tokenizer(feedback_cleaned, return_tensors="tf")
+        output = NaqSentModel(inputs)
+        pred_prob = tf.nn.softmax(output.logits, axis=-1)
+        pred = np.argmax(pred_prob)
+        if pred == 1:
+            new_row = {"Prediction": "Positive" }
+            predictions = pd.concat([predictions, pd.DataFrame([new_row])], ignore_index=True)
+            Positive += 1
+        else:
+            new_row = {"Prediction": "Negative" }
+            predictions = pd.concat([predictions, pd.DataFrame([new_row])], ignore_index=True)
+            Negative += 1
+    uploaded_df["Prediction"] = predictions["Prediction"]
+    # Converting to html Table
+    uploaded_df_html = uploaded_df.to_html()
+    return render_template('show_csv_data.html',
+                           data_var=uploaded_df_html,
+                           act1="Positive",
+                           act2="Negative",
+                           t1 = Positive,
+                           t2 = Negative,
+                           ht=500, wt=800,
+                           title="Feedback")
+
+########################################################
+########################################################
+########################################################
 
 if __name__ == '__main__':
     with app.app_context():
