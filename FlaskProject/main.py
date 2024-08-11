@@ -130,6 +130,79 @@ def updateGestures():
 
     return redirect(url_for('customize'))
 
+#############################################
+############## NAQIB ROUTES #################
+#############################################
+
+@app.route('/uploadCSV', methods=['GET', 'POST'])
+def uploadFile():
+    if request.method == 'POST':
+      # upload file flask
+        f = request.files.get('file')
+
+        # Extracting uploaded file name
+        data_filename = secure_filename(f.filename)
+
+        f.save(os.path.join(app.config['UPLOAD_FOLDER'], data_filename))
+
+        session['uploaded_data_file_path'] = os.path.join(app.config['UPLOAD_FOLDER'], data_filename)
+
+        return render_template('SentimentForm2.html')
+    return render_template("SentimentForm.html")
+
+@app.route('/show_data')
+def showData():
+    # Uploaded File Path
+    data_file_path = session.get('uploaded_data_file_path', None)
+    # read csv
+    uploaded_df = pd.read_csv(data_file_path, encoding='unicode_escape')
+    # Converting to html Table
+    uploaded_df_html = uploaded_df.to_html()
+    return render_template('show_csv_data.html', data_var=uploaded_df_html)
+
+@app.route('/SentimentForm')
+def SentimentForm():
+    return render_template('SentimentForm.html')
+
+@app.route("/sentiment")
+def sentiment():
+    Positive = 0
+    Negative = 0
+    # Uploaded File Path
+    data_file_path = session.get('uploaded_data_file_path', None)
+    # read csv
+    uploaded_df = pd.read_csv(data_file_path, encoding='unicode_escape')
+    predictions = pd.DataFrame(columns=['Prediction'])
+    #target = ["Negative", "Positive"]
+    for index, row in uploaded_df.iterrows():
+        feedback_cleaned = clean(row['comment'])
+        inputs = tokenizer(feedback_cleaned, return_tensors="tf")
+        output = NaqSentModel(inputs)
+        pred_prob = tf.nn.softmax(output.logits, axis=-1)
+        pred = np.argmax(pred_prob)
+        if pred == 1:
+            new_row = {"Prediction": "Positive" }
+            predictions = pd.concat([predictions, pd.DataFrame([new_row])], ignore_index=True)
+            Positive += 1
+        else:
+            new_row = {"Prediction": "Negative" }
+            predictions = pd.concat([predictions, pd.DataFrame([new_row])], ignore_index=True)
+            Negative += 1
+    uploaded_df["Prediction"] = predictions["Prediction"]
+    # Converting to html Table
+    uploaded_df_html = uploaded_df.to_html()
+    return render_template('show_csv_data.html',
+                           data_var=uploaded_df_html,
+                           act1="Positive",
+                           act2="Negative",
+                           t1 = Positive,
+                           t2 = Negative,
+                           ht=500, wt=800,
+                           title="Feedback")
+
+########################################################
+########################################################
+########################################################
 
 if __name__ == '__main__':
     with app.app_context():
