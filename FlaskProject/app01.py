@@ -3,22 +3,19 @@ import numpy as np
 import tensorflow as tf
 import cv2
 from PIL import Image
-import keras
 import os
 from tensorflow.keras.models import load_model
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime 
 import base64
 from werkzeug.security import generate_password_hash, check_password_hash
-
+import urllib.parse
+import pypyodbc as odbc
 from fileinput import filename
 import pandas as pd
 import nltk
 import numpy as np
-import scipy
 from werkzeug.utils import secure_filename
-import random
-import math
 import re
 from textblob import TextBlob
 import string
@@ -37,6 +34,8 @@ from nltk.stem import WordNetLemmatizer
 from nltk.stem import PorterStemmer
 nltk.download("wordnet")
 nltk.download("omw-1.4")
+
+from credentials import username, password
 
 UPLOAD_FOLDER = os.path.join('staticFiles', 'uploads')
 ALLOWED_EXTENSIONS = {'csv'}
@@ -102,6 +101,9 @@ def initialize_nlp_model():
             print(f"Error initializing NLP model: {e}")
 
 
+#params = urllib.parse.quote_plus("Driver=ODBC Driver 18 for SQL Server;Server=tcp:aap-221734q.database.windows.net,1433;Database=aap;Uid=aap-user;Pwd={pM3sEHAZ+_2hu5-};Encrypt=yes;TrustServerCertificate=yes;Connection Timeout=30;")
+#app.config['SQLALCHEMY_DATABASE_URI'] = "mssql+pyodbc:///?odbc_connect=%s" % params
+#app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://aap:mysql@localhost:3306/aap'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
