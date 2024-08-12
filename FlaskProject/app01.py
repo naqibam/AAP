@@ -9,8 +9,6 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime 
 import base64
 from werkzeug.security import generate_password_hash, check_password_hash
-import urllib.parse
-import pypyodbc as odbc
 from fileinput import filename
 import pandas as pd
 import nltk
