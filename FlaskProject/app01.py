@@ -61,6 +61,8 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.secret_key = 'supersecretkey'
 
+NaqSentMdl = TFAutoModelForSequenceClassification.from_pretrained("finetuned_model")
+tokenizer = AutoTokenizer.from_pretrained('distilbert-base-uncased')
 # Define constants
 IMAGE_SIZE = 150
 
