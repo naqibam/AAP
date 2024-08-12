@@ -1,8 +1,3 @@
-please run  pip install -r requirements.txt 
-before running the files
-
-Mysql set up:
-user = aap
-schema = aap
-password = mysql
-localhoast:3306
+version https://git-lfs.github.com/spec/v1
+oid sha256:78eb3e4d67a495ea7c2097a1d334291ea9c74f3ccdaa8d44cdd4a6b916c70667
+size 142

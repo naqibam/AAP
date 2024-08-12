@@ -1,23 +1,3 @@
-{
-  "_name_or_path": "distilbert-base-uncased",
-  "activation": "gelu",
-  "architectures": [
-    "DistilBertForSequenceClassification"
-  ],
-  "attention_dropout": 0.1,
-  "dim": 768,
-  "dropout": 0.1,
-  "hidden_dim": 3072,
-  "initializer_range": 0.02,
-  "max_position_embeddings": 512,
-  "model_type": "distilbert",
-  "n_heads": 12,
-  "n_layers": 6,
-  "pad_token_id": 0,
-  "qa_dropout": 0.1,
-  "seq_classif_dropout": 0.2,
-  "sinusoidal_pos_embds": false,
-  "tie_weights_": true,
-  "transformers_version": "4.42.4",
-  "vocab_size": 30522
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:15d1cc11d0d244df2f806e49b6636dc23b70b1d424bd8607a410e8745dfa70ff
+size 538
