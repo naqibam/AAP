@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Feedback System{% endblock %}
+
+{% block content %}
+<h1 class="display-4">Feedback Analyze</h1>
+<br>
+<div id = "simple_chart"></div>
+{{ data_var|safe }}
+
+
+<script type = "text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <script type = "text/javascript">
+            google.charts.load('current', {'packages': ['corechart']})
+
+            google.charts.setOnLoadCallback(drawCharts)
+
+            function drawCharts() {
+                var data = new google.visualization.DataTable()
+              data.addColumn('string', 'Sentiment')
+              data.addColumn('number', 'Number');
+              data.addRows([
+                  ['{{act1}}', {{t1}}],
+                  ['{{act2}}', {{t2}}]
+              ]);
+
+              var options_1 = {
+                  'title': 'Simple Chart',
+                  'width': '{{wt}}',
+                             'height': '{{ht}}'
+              }
+
+              var simple_chart = new google.visualization.PieChart(document.getElementById('simple_chart'));
+              simple_chart.draw(data, options_1);}
+        </script >
+{% endblock %}
