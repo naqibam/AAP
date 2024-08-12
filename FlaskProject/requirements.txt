@@ -70,6 +70,7 @@ nltk==3.8.2
 numpy==1.26.4
 opencv-contrib-python==4.10.0.84
 opencv-python==4.10.0.84
+opencv-python-headless
 opt-einsum==3.3.0
 optree==0.12.1
 packaging==23.1
