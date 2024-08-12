@@ -1,2 +1,8 @@
 please run  pip install -r requirements.txt 
 before running the files
+
+Mysql set up:
+user = aap
+schema = aap
+password = mysql
+localhoast:3306
